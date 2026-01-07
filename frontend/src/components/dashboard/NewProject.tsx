@@ -19,6 +19,7 @@ import {
   Plus,
   X,
 } from "lucide-react";
+import axios from "axios";
 
 type ServiceType =
   | "static-site"
@@ -115,7 +116,7 @@ export function NewProject() {
     setEnvVars(updated);
   };
 
-  const handleDeploy = () => {
+  const handleDeploy = async () => {
     console.log({
       serviceType,
       gitUrl,
@@ -126,6 +127,14 @@ export function NewProject() {
       outputDir,
       envVars,
     });
+    try {
+      const response = await axios.post("http://localhost:7830/deploy/staticSite", {
+        gitURL : gitUrl,
+        slug : projectName
+      }, { withCredentials: true });
+      console.log(response.data)
+    } catch (error) {
+    }
     router.push("/dashboard");
   };
 
