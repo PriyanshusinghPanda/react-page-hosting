@@ -24,6 +24,16 @@ router.post("/staticSite", async (req, res) => {
   const projectSlug = slug || `proj-${Date.now()}`;
   console.log("hi")
 
+  try {
+    const existingProject = await Project.findOne({ name: projectSlug });
+    if (existingProject) {
+      return res.status(400).json({ error: "A project with this name already exists. Please choose a different name." });
+    }
+  } catch (error) {
+    console.error("Error checking for existing project:", error);
+    return res.status(500).json({ error: "Failed to validate project name." });
+  }
+
   // bucket name
   // to-do:- get the bucket name if slug provided 
   if (RUN_ENV == "production") {
@@ -80,6 +90,17 @@ router.post("/staticSite", async (req, res) => {
     //       data: { projectSlug, url: `http://localhost:443/view/${projectSlug}` }
     //     });
     //   });
+    // Set headers for Server-Sent Events (SSE)
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders(); // Ensure headers are sent immediately to establish the stream
+
+    // Send a comment every 15 seconds to keep the connection alive through proxies
+    const keepAliveId = setInterval(() => {
+      res.write(':\n\n'); 
+    }, 15000);
+
     const child = spawn(`docker run --rm --link minio \
       -e REPO_URL=${gitURL} \
       -e JOB_ID=${projectSlug} \
@@ -88,12 +109,19 @@ router.post("/staticSite", async (req, res) => {
       -e STORAGE_SECRET_KEY=${process.env.STORAGE_SECRET_KEY} \
       -e BUCKET_NAME=${process.env.BUCKET_NAME} \
       buildserver:latest`, { shell: true })
+      
     child.stdout.on('data', (data) => {
-      console.log(`stdout (real time): ${data}`);
+      const output = data.toString();
+      console.log(`stdout (real time): ${output}`);
+      res.write(`data: ${JSON.stringify({ log: output })}\n\n`);
     })
+    
     child.stderr.on('data', (data) => {
-      console.error(`stderr (real time): ${data}`);
+      const output = data.toString();
+      console.error(`stderr (real time): ${output}`);
+      res.write(`data: ${JSON.stringify({ log: output })}\n\n`);
     });
+    
     child.on('close', async (code) => {
       console.log(`child process closed with code ${code}`);
       
@@ -110,20 +138,25 @@ router.post("/staticSite", async (req, res) => {
               lastDeployed: new Date()
           });
 
-          res.status(200).json({
-              status: "queued",
-              data: { projectSlug, url }
-          });
+          if (code === 0) {
+              res.write(`data: ${JSON.stringify({ status: "queued", data: { projectSlug, url } })}\n\n`);
+          } else {
+              res.write(`data: ${JSON.stringify({ error: "Build process failed with non-zero exit code" })}\n\n`);
+          }
       } catch (err) {
           console.error('Error saving project to DB:', err);
-          res.status(500).json({ error: "Deployment finished but failed to save project" });
+          res.write(`data: ${JSON.stringify({ error: "Deployment finished but failed to save project" })}\n\n`);
       }
+      clearInterval(keepAliveId);
+      res.end();
     });
+    
     child.on('error', (err) => {
       console.error('Failed to start child process:', err);
+      res.write(`data: ${JSON.stringify({ error: "Failed to start deployment process" })}\n\n`);
+      clearInterval(keepAliveId);
+      res.end();
     });
-
-
 
   } else {
     console.log("Invalid RUN_ENV configuration.");

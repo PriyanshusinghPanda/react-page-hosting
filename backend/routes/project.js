@@ -12,5 +12,20 @@ router.get("/", async (req, res) => {
         res.status(500).json({ error: "Internal server error." });
     }
 });
+router.get("/check-name", async (req, res) => {
+    try {
+        const { name } = req.query;
+        if (!name) {
+            return res.status(400).json({ error: "Project name is required" });
+        }
+        
+        // Check if any project exists with this name globally
+        const existingProject = await Project.findOne({ name });
+        res.status(200).json({ available: !existingProject });
+    } catch (error) {
+        console.error("Error checking project name:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+});
 
 module.exports = router;

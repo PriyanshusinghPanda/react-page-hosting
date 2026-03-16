@@ -42,40 +42,40 @@
 }
 
 .dark {
-  --background: #0D1821;
-  --foreground: #F7FFF6;
-  --card: #1a2632;
-  --card-foreground: #F7FFF6;
-  --popover: #1a2632;
-  --popover-foreground: #F7FFF6;
-  --primary: #441FFF;
-  --primary-foreground: #F7FFF6;
-  --secondary: #0C7C59;
-  --secondary-foreground: #F7FFF6;
-  --muted: #2a3642;
-  --muted-foreground: #a0adb8;
-  --accent: #FFFF1F;
-  --accent-foreground: #0D1821;
-  --destructive: #DD1155;
-  --destructive-foreground: #F7FFF6;
-  --border: rgba(247, 255, 246, 0.1);
-  --input: rgba(247, 255, 246, 0.05);
-  --ring: #441FFF;
+  --background: #020205; /* Deep, near-pitch black (Jellyfish depths) */
+  --foreground: #E0E7FF; /* Ice blue-white for text */
+  --card: #0A0F1A;     /* Slightly lighter for elevation */
+  --card-foreground: #E0E7FF;
+  --popover: #0A0F1A;
+  --popover-foreground: #E0E7FF;
+  --primary: #00E3CC;    /* Neon Cyan */
+  --primary-foreground: #020205;
+  --secondary: #FF2E93;  /* Vibrant Neon Pink */
+  --secondary-foreground: #FFFFFF;
+  --muted: #131A2A;      /* Subtle muted background */
+  --muted-foreground: #6B7280;
+  --accent: #FFD700;     /* Neon Yellow/Gold */
+  --accent-foreground: #020205;
+  --destructive: #FF4B4B; 
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(255, 255, 255, 0.08); /* Minimal thin borders */
+  --input: rgba(255, 255, 255, 0.04);
+  --ring: #00E3CC;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --chart-1: #441FFF;
-  --chart-2: #0C7C59;
-  --chart-3: #FFFF1F;
-  --chart-4: #DD1155;
-  --chart-5: #F7FFF6;
-  --sidebar: #0D1821;
-  --sidebar-foreground: #F7FFF6;
-  --sidebar-primary: #441FFF;
-  --sidebar-primary-foreground: #F7FFF6;
-  --sidebar-accent: #0C7C59;
-  --sidebar-accent-foreground: #F7FFF6;
-  --sidebar-border: rgba(247, 255, 246, 0.1);
-  --sidebar-ring: #441FFF;
+  --chart-1: #00E3CC;
+  --chart-2: #FF2E93;
+  --chart-3: #FFD700;
+  --chart-4: #B284FF;    /* Neon purple */
+  --chart-5: #E0E7FF;
+  --sidebar: #020205;
+  --sidebar-foreground: #E0E7FF;
+  --sidebar-primary: #00E3CC;
+  --sidebar-primary-foreground: #020205;
+  --sidebar-accent: #131A2A;
+  --sidebar-accent-foreground: #E0E7FF;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #00E3CC;
 }
 
 @theme inline {
@@ -199,6 +199,16 @@ html {
     linear-gradient(rgba(68, 31, 255, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(68, 31, 255, 0.1) 1px, transparent 1px);
   background-size: 30px 30px;
+}
+
+.dark .dot-grid {
+  background-image: radial-gradient(circle, rgba(0, 227, 204, 0.08) 1px, transparent 1px);
+}
+
+.dark .square-grid {
+  background-image: 
+    linear-gradient(rgba(0, 227, 204, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 227, 204, 0.05) 1px, transparent 1px);
 }
 
 /* Sticker animations */
