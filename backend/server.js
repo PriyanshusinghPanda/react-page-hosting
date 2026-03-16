@@ -44,10 +44,12 @@ app.use(cookieParser())
 const deployRoute = require("./routes/deploy.js");
 const viewRoute = require("./routes/view.js");
 const userRoute = require("./routes/user.js");
+const projectRoute = require("./routes/project.js");
 
 // mount routes
 app.use("/deploy", authUser ,deployRoute);
 app.use("/user", userRoute);
+app.use("/project", authUser, projectRoute);
 
 // app.use("/view", viewRoute);
 app.use((req, res, next) => {

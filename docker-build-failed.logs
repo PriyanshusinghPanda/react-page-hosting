@@ -1,0 +1,447 @@
+2025-08-19 14:15:21
+INFO
+Processing job c7edbe98-fd0b-4b0a-8722-0e31b60109d2...
+2025-08-19 14:15:21
+INFO
+Started subprocess for job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 with command: /usr/local/bin/python -m src.processor_v2.processor c7edbe98-fd0b-4b0a-8722-0e31b60109d2
+2025-08-19 14:15:22
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: ⚠ No valid DB tokens; falling back to env.GITHUB_TOKEN
+2025-08-19 14:15:23
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: [2025-08-19T14:15:23.901290] [INFO] Registering job windows task: tasks.create_pr_job_windows_java
+2025-08-19 14:15:23
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: [2025-08-19T14:15:23.901896] [INFO] Registering job windows task: tasks.create_pr_job_windows_javascript
+2025-08-19 14:15:23
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: [2025-08-19T14:15:23.901954] [INFO] Registering job windows task: tasks.create_pr_job_windows_typescript
+2025-08-19 14:15:23
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: [2025-08-19T14:15:23.901973] [INFO] Registering job windows task: tasks.create_pr_job_windows_python
+2025-08-19 14:15:23
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: [2025-08-19T14:15:23.901987] [INFO] Registering job windows task: tasks.create_pr_job_windows_go
+2025-08-19 14:15:23
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: Running task: main with args: (), kwargs: {}
+2025-08-19 14:15:23
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: Starting processor_v2 main function...
+2025-08-19 14:15:23
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: Processing job with ID: c7edbe98-fd0b-4b0a-8722-0e31b60109d2
+2025-08-19 14:15:23
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: ⚠ No valid DB tokens; falling back to env.GITHUB_TOKEN
+2025-08-19 14:15:23
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: [2025-08-19T14:15:23.967845] [INFO] Run Dockerization V2: processing Automattic__mongoose@15383
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: [2025-08-19T14:15:24.202778] [INFO] Attempting dockerization with repo config specs: [
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: {
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: "build": [
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: "npm install --no-audit --progress=false"
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: ],
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: "test_cmd": "CI=true npm test -- --reporter spec --full-trace --timeout 60000",
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: "pre_install": [],
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: "docker_specs": {
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: "node_version": "18"
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: },
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: "log_parser_name": "jest"
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: }
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: ]
+2025-08-19 14:15:24
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: 2025-08-19 14:15:24,202 - dockerize_agent_v2 - INFO - [START] dockerize_agent_v2 for https://github.com/Automattic/mongoose.git@15383
+2025-08-19 14:15:29
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: 2025-08-19 14:15:29,391 - dockerize_agent_v2 - INFO - [Lock Acquired] Cloning SWE-Bench repository to repo_dockerization/swebench
+2025-08-19 14:16:09
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: 📝 Saving execution_id cd0dfee6-8971-4d04-a933-66b33ee31626 for job c7edbe98-fd0b-4b0a-8722-0e31b60109d2
+2025-08-19 14:16:09
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: ✅ Execution ID cd0dfee6-8971-4d04-a933-66b33ee31626 saved to job c7edbe98-fd0b-4b0a-8722-0e31b60109d2
+2025-08-19 14:16:09
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: [2025-08-19T14:16:09.584306] [DEBUG] Cloud IDE execution ID: cd0dfee6-8971-4d04-a933-66b33ee31626
+2025-08-19 14:16:09
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: Execution ID: cd0dfee6-8971-4d04-a933-66b33ee31626
+2025-08-19 14:16:10
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: PENDING
+2025-08-19 14:17:11
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:18:22
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:19:37
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:20:38
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:21:54
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:22:54
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:23:55
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:25:20
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:26:55
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:29:01
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:30:01
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:31:21
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:32:50
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:33:50
+INFO
+Job c7edbe98-fd0b-4b0a-8722-0e31b60109d2 output: PING: Status: IN_PROGRESS
+2025-08-19 14:36:11
+WARNING
+Job was interrupted. Restarting...
+2025-08-19 14:36:11
+DEBUG
+Starting job. job_id: c7edbe98-fd0b-4b0a-8722-0e31b60109d2, task_id: c7edbe98-fd0b-4b0a-8722-0e31b60109d2, worker_id: celery@swe-bench-plus-master-worker-cron-57bf8789cc-rhgp9, pid: 21
+2025-08-19 14:36:11
+INFO
+Run Dockerization V2: processing Automattic__mongoose@15383
+2025-08-19 14:36:11
+INFO
+Attempting dockerization with repo config specs: [
+    {
+        "build": [
+            "npm install --no-audit --progress=false"
+        ],
+        "test_cmd": "CI=true npm test -- --reporter spec --full-trace --timeout 60000",
+        "pre_install": [],
+        "docker_specs": {
+            "node_version": "18"
+        },
+        "log_parser_name": "jest"
+    }
+]
+2025-08-19 14:36:30
+DEBUG
+Cloud IDE execution ID: 98acf46d-4bbb-4374-a882-2c1ef4e37680
+2025-08-19 15:02:37
+INFO
+Generating SWE-bench instance for PR: https://github.com/Automattic/mongoose/pull/15383
+
+Fetching PR details for Automattic/mongoose PR #15383...
+PR is merged. Deriving base_commit from merge_commit_sha: 93a7edcdca52675873c12f92c2a9c10a8b830855
+Derived base_commit: 55eef44780636f59424c2da6620ad38d5d51b1c7
+Fetching patch content from https://github.com/Automattic/mongoose/pull/15383.diff...
+
+Initializing Docker Agent to generate instance configuration...
+--- Starting Docker Agent Workflow ---
+
+--- Agent Attempt with provided spec: {'build': ['npm install --no-audit --progress=false'], 'test_cmd': 'CI=true npm test -- --reporter spec --full-trace --timeout 60000', 'pre_install': [], 'docker_specs': {'node_version': '18'}, 'log_parser_name': 'jest'} ---
+
+INFO: Pruning stopped Docker containers to ensure a clean slate...
+INFO: Docker cleanup successful.
+Executing in /tmp/tmps8tlhx1f: python -W ignore -m swebench.harness.run_evaluation --run_id eval --dataset_name dataset.json --predictions_path gold --namespace "" --turing_eval
+COMMAND SUCCEEDED: python -W ignore -m swebench.harness.run_evaluation --run_id eval --dataset_name dataset.json --predictions_path gold --namespace "" --turing_eval
+STDOUT:
+Using gold predictions - ignoring predictions_path
+Building base image (sweb.base.js.x86_64.6eb5c4c905:latest)
+Base images built successfully.
+Total environment images to build: 1
+All environment images built successfully.
+Running 1 instances...
+Not able to get instance files
+Not able to get env files
+Not able to get instance files
+All instances run.
+Cleaning cached images...
+Removed 0 images.
+Total instances: 1
+Instances submitted: 1
+Instances completed: 1
+Instances incomplete: 0
+Instances resolved: 1
+Instances unresolved: 0
+Instances with empty patches: 0
+Instances with errors: 0
+Unstopped containers: 0
+Unremoved images: 0
+Report written to gold.eval.json
+
+STDERR:
+
+  0%|          | 0/1 [00:00<?, ?it/s]
+100%|██████████| 1/1 [00:33<00:00, 33.87s/it]
+1 ran successfully, 0 failed: 100%|██████████| 1/1 [00:33<00:00, 33.87s/it]
+1 ran successfully, 0 failed: 100%|██████████| 1/1 [00:33<00:00, 33.87s/it]
+
+  0%|          | 0/1 [00:00<?, ?it/s]
+100%|██████████| 1/1 [13:52<00:00, 832.41s/it]
+1 ran successfully, 0 failed: 100%|██████████| 1/1 [13:52<00:00, 832.41s/it]
+1 ran successfully, 0 failed: 100%|██████████| 1/1 [13:52<00:00, 832.41s/it]
+
+Found test_output_base.txt path: /tmp/tmps8tlhx1f/logs/run_evaluation/eval/gold/Automattic__mongoose-15383/test_output_base.txt
+Found tests_report.json path: /tmp/tmps8tlhx1f/logs/run_evaluation/eval/gold/Automattic__mongoose-15383/tests_report.json
+--- Agent Verification Successful with provided spec! ---
+COMMAND SUCCEEDED: python -W ignore -m swebench.harness.run_evaluation --run_id eval --dataset_name dataset.json --predictions_path gold --namespace "" --turing_eval
+STDOUT:
+Using gold predictions - ignoring predictions_path
+Building base image (sweb.base.js.x86_64.6eb5c4c905:latest)
+Base images built successfully.
+Total environment images to build: 1
+All environment images built successfully.
+Running 1 instances...
+Not able to get instance files
+Not able to get env files
+Not able to get instance files
+All instances run.
+Cleaning cached images...
+Removed 0 images.
+Total instances: 1
+Instances submitted: 1
+Instances completed: 1
+Instances incomplete: 0
+Instances resolved: 1
+Instances unresolved: 0
+Instances with empty patches: 0
+Instances with errors: 0
+Unstopped containers: 0
+Unremoved images: 0
+Report written to gold.eval.json
+
+STDERR:
+
+  0%|          | 0/1 [00:00<?, ?it/s]
+100%|██████████| 1/1 [00:33<00:00, 33.87s/it]
+1 ran successfully, 0 failed: 100%|██████████| 1/1 [00:33<00:00, 33.87s/it]
+1 ran successfully, 0 failed: 100%|██████████| 1/1 [00:33<00:00, 33.87s/it]
+
+  0%|          | 0/1 [00:00<?, ?it/s]
+100%|██████████| 1/1 [13:52<00:00, 832.41s/it]
+1 ran successfully, 0 failed: 100%|██████████| 1/1 [13:52<00:00, 832.41s/it]
+1 ran successfully, 0 failed: 100%|██████████| 1/1 [13:52<00:00, 832.41s/it]
+
+
+--- test_output_base.txt not found at /tmp/tmps8tlhx1f/logs/run_evaluation/eval/gold/Automattic__mongoose-15383/test_output_base.txt ---
+--- tests_report.json not found at /tmp/tmps8tlhx1f/logs/run_evaluation/eval/gold/Automattic__mongoose-15383/tests_report.json ---
+
+--- Final Docker Configuration ---
+{
+    "build": [
+        "npm install --no-audit --progress=false"
+    ],
+    "test_cmd": "CI=true npm test -- --reporter spec --full-trace --timeout 60000",
+    "pre_install": [],
+    "docker_specs": {
+        "node_version": "18"
+    },
+    "log_parser_name": "jest"
+}
+
+Successfully wrote Docker constants to '/app/data/datasets/generated_instances/mongoose-15383/Automattic__mongoose-15383_custom_repo_specs.json'
+Successfully wrote instance to '/app/data/datasets/generated_instances/mongoose-15383/Automattic__mongoose-15383_dataset.jsonl'
+2025-08-19 15:02:59
+INFO
+Exported dockerization result to Google Drive: https://drive.google.com/drive/folders/1oXMduiL4Y1titl1l7Nap0mFJDbKoDigV
+2025-08-19 15:02:59
+WARNING
+Test reports JSON is missing FAIL_TO_PASS or PASS_TO_PASS: {
+  "FAIL_TO_PASS": [],
+  "PASS_TO_PASS": [],
+  "PASS_TO_FAIL": [],
+  "FAIL_TO_FAIL": [],
+  "other_transitions": {
+    "before_only": {},
+    "after_only": {}
+  }
+}. Skipping MSFT trigger.
+2025-08-19 15:02:59
+INFO
+Harness finished running
+2025-08-19 15:02:59
+INFO
+New Spec not generated! 
+2025-08-19 15:02:59
+INFO
+Skipping MSFT job trigger. Check logs for details.
+2025-08-19 15:02:59
+ERROR
+(psycopg2.OperationalError) SSL SYSCALL error: EOF detected
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1128, in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 711, in do_rollback
+    dbapi_connection.rollback()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+psycopg2.OperationalError: SSL SYSCALL error: EOF detected
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/src/celery/task_utils.py", line 117, in wrapper
+    result = loop.run_until_complete(func(repo_id, instance_id, payload, job_id))
+  File "/usr/local/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/app/src/celery/tasks/run_dockerization_v2.py", line 29, in run_dockerization_v2
+    return await run_dockerization_v2_processor(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/celery/tasks/run_dockerization_v2.py", line 340, in run_dockerization_v2_processor
+    session.close()
+    ~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/orm/scoping.py", line 526, in close
+    return self._proxied.close()
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2521, in close
+    self._close_impl(invalidate=False)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2590, in _close_impl
+    transaction.close(invalidate)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "<string>", line 2, in close
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 1419, in close
+    transaction.close()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2589, in close
+    self._do_close()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2727, in _do_close
+    self._close_impl()
+    ~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2713, in _close_impl
+    self._connection_rollback_impl()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2705, in _connection_rollback_impl
+    self.connection._rollback_impl()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1130, in _rollback_impl
+    self._handle_dbapi_exception(e, None, None, None, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1128, in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 711, in do_rollback
+    dbapi_connection.rollback()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) SSL SYSCALL error: EOF detected
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-08-19 15:02:59
+ERROR
+Error processing job c7edbe98-fd0b-4b0a-8722-0e31b60109d2: (psycopg2.OperationalError) SSL SYSCALL error: EOF detected
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1128, in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 711, in do_rollback
+    dbapi_connection.rollback()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+psycopg2.OperationalError: SSL SYSCALL error: EOF detected
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/src/celery/task_utils.py", line 117, in wrapper
+    result = loop.run_until_complete(func(repo_id, instance_id, payload, job_id))
+  File "/usr/local/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/app/src/celery/tasks/run_dockerization_v2.py", line 29, in run_dockerization_v2
+    return await run_dockerization_v2_processor(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/celery/tasks/run_dockerization_v2.py", line 340, in run_dockerization_v2_processor
+    session.close()
+    ~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/orm/scoping.py", line 526, in close
+    return self._proxied.close()
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2521, in close
+    self._close_impl(invalidate=False)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2590, in _close_impl
+    transaction.close(invalidate)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "<string>", line 2, in close
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 1419, in close
+    transaction.close()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2589, in close
+    self._do_close()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2727, in _do_close
+    self._close_impl()
+    ~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2713, in _close_impl
+    self._connection_rollback_impl()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2705, in _connection_rollback_impl
+    self.connection._rollback_impl()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1130, in _rollback_impl
+    self._handle_dbapi_exception(e, None, None, None, None)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1128, in _rollback_impl
+    self.engine.dialect.do_rollback(self.connection)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 711, in do_rollback
+    dbapi_connection.rollback()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) SSL SYSCALL error: EOF detected
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)

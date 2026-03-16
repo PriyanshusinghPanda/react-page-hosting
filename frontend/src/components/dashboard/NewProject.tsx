@@ -18,8 +18,9 @@ import {
   ArrowLeft,
   Plus,
   X,
+  Mail,
 } from "lucide-react";
-import axios from "axios";
+import api from "../../lib/api";
 
 type ServiceType =
   | "static-site"
@@ -55,6 +56,15 @@ export function NewProject() {
         "Static content served over a global CDN. Ideal for frontend, blogs, and content sites.",
       color: "primary" as const,
       emoji: "🌐",
+    },
+    {
+      type: "email-service" as ServiceType,
+      icon: Mail,
+      title: "Email Service",
+      description:
+        "Email service for sending emails.",
+      color: "secondary" as const,
+      // emoji: "📧",
     },
     {
       type: "web-service" as ServiceType,
@@ -128,12 +138,28 @@ export function NewProject() {
       envVars,
     });
     try {
-      const response = await axios.post("http://localhost:7830/deploy/staticSite", {
+      const routeMap: Record<string, string> = {
+        "static-site": "staticSite",
+        "email-service": "emailService",
+        "web-service": "webService",
+        "private-service": "privateService",
+        "background-worker": "backgroundWorker",
+        "cron-job": "cronJob",
+        "database": "database",
+      };
+      const typeKey = serviceType ? routeMap[serviceType] || "staticSite" : "staticSite";
+      
+      const response = await api.post(`/deploy/${typeKey}`, {
         gitURL : gitUrl,
-        slug : projectName
-      }, { withCredentials: true });
+        slug : projectName,
+        startCommand : startCommand,
+        buildCommand : buildCommand,
+        outputDir : outputDir,
+        envVars : envVars
+      });
       console.log(response.data)
     } catch (error) {
+      console.error("Deployment error:", error);
     }
     router.push("/dashboard");
   };
@@ -141,7 +167,7 @@ export function NewProject() {
   return (
     <div className="min-h-full bg-background square-grid relative overflow-hidden">
       {/* Floating stickers */}
-      <div className="absolute top-20 left-[10%] hidden lg:block">
+      {/* <div className="absolute top-20 left-[10%] hidden lg:block z-[-1] pointer-events-none">
         <Sticker icon={Rocket} color="primary" size="md" rotation={-15} />
       </div>
       <div className="absolute top-40 right-[15%] hidden lg:block">
@@ -149,7 +175,7 @@ export function NewProject() {
       </div>
       <div className="absolute bottom-32 right-[20%] hidden lg:block">
         <Sticker icon={Heart} color="pink" size="md" rotation={-10} />
-      </div>
+      </div> */}
 
       <div className="p-6 md:p-8">
         <div className="max-w-5xl mx-auto">

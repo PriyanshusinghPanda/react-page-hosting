@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -32,31 +33,32 @@ interface Project {
 
 export function ProjectsList() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [projects] = useState<Project[]>([
-    {
-      id: "1",
-      name: "portfolio-website",
-      type: "frontend",
-      url: "https://portfolio.example.com",
-      status: "active",
-      lastDeployed: "2 hours ago",
-    },
-    {
-      id: "2",
-      name: "api-server",
-      type: "backend",
-      url: "https://api.example.com",
-      status: "active",
-      lastDeployed: "1 day ago",
-    },
-    {
-      id: "3",
-      name: "blog-site",
-      type: "frontend",
-      status: "building",
-      lastDeployed: "Just now",
-    },
-  ]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get("http://localhost:7830/project", { withCredentials: true });
+        // Map the backend projects to the frontend structure
+        const fetchedProjects = response.data.projects.map((p: any) => ({
+          id: p._id,
+          name: p.name,
+          type: p.type || "frontend",
+          url: p.url,
+          status: p.status,
+          lastDeployed: new Date(p.lastDeployed || p.createdAt).toLocaleString(),
+        }));
+        setProjects(fetchedProjects);
+      } catch (error) {
+        console.error("Failed to fetch projects", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const filteredProjects = projects.filter((project) =>
     project.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -93,7 +95,11 @@ export function ProjectsList() {
         </div>
 
         {/* Projects Grid */}
-        {filteredProjects.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-16">
+            <h3 className="mb-2">Loading projects...</h3>
+          </div>
+        ) : filteredProjects.length === 0 ? (
           <div className="text-center py-16 bg-card border-2 border-border rounded-2xl">
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
               <Globe className="w-8 h-8 text-muted-foreground" />
@@ -123,8 +129,8 @@ export function ProjectsList() {
                   <div className="flex items-start gap-4 flex-1">
                     <div
                       className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 ${project.type === "frontend"
-                          ? "bg-primary/10 border-primary/30"
-                          : "bg-secondary/10 border-secondary/30"
+                        ? "bg-primary/10 border-primary/30"
+                        : "bg-secondary/10 border-secondary/30"
                         }`}
                     >
                       {project.type === "frontend" ? (

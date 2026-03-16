@@ -142,7 +142,10 @@ export function SignUp() {
               Create Account 🎉
             </Button>
 
+
+            {/* to-do: add divider */}
             {/* Divider */}
+            {/* 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t-2 border-border" />
@@ -151,8 +154,11 @@ export function SignUp() {
                 <span className="bg-card px-4 text-muted-foreground">or sign up with</span>
               </div>
             </div>
+            */}
 
+            {/* to-do: add social signup */}
             {/* Social signup */}
+            {/* 
             <div className="grid grid-cols-2 gap-4">
               <Button
                 type="button"
@@ -176,6 +182,7 @@ export function SignUp() {
                 Google
               </Button>
             </div>
+            */}
           </form>
 
           {/* Sign in link */}

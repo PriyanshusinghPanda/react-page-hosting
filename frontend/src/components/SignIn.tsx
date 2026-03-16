@@ -123,7 +123,9 @@ export function SignIn() {
               Sign In 🚀
             </Button>
 
+            {/* to-do: add divider */}
             {/* Divider */}
+            {/* 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t-2 border-border" />
@@ -132,8 +134,11 @@ export function SignIn() {
                 <span className="bg-card px-4 text-muted-foreground">or continue with</span>
               </div>
             </div>
+            */}
 
+            {/* to-do: add social login */}
             {/* Social login */}
+            {/* 
             <div className="grid grid-cols-2 gap-4">
               <Button
                 type="button"
@@ -157,6 +162,7 @@ export function SignIn() {
                 Google
               </Button>
             </div>
+            */}
           </form>
 
           {/* Sign up link */}

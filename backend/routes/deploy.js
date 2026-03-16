@@ -3,6 +3,7 @@ const { DefaultAzureCredential } = require("@azure/identity");
 const { ContainerAppsAPIClient } = require("@azure/arm-appcontainers");
 const exce = require("child_process").exec;
 const spawn = require("child_process").spawn;
+const Project = require("../models/project");
 const router = express.Router();
 
 
@@ -93,12 +94,30 @@ router.post("/staticSite", async (req, res) => {
     child.stderr.on('data', (data) => {
       console.error(`stderr (real time): ${data}`);
     });
-    child.on('close', (code) => {
+    child.on('close', async (code) => {
       console.log(`child process closed with code ${code}`);
-      res.status(200).json({
-          status: "queued",
-          data: { projectSlug, url: `http://${projectSlug}.localhost:7830/` }
-        });
+      
+      try {
+          const status = code === 0 ? 'active' : 'error';
+          const url = `http://${projectSlug}.localhost:7830/`;
+
+          const project = await Project.create({
+              userId: req.user._id,
+              name: projectSlug,
+              type: 'static-site', // Defaulting to static-site based on the endpoint, you might want it from frontend
+              url: code === 0 ? url : null,
+              status: status,
+              lastDeployed: new Date()
+          });
+
+          res.status(200).json({
+              status: "queued",
+              data: { projectSlug, url }
+          });
+      } catch (err) {
+          console.error('Error saving project to DB:', err);
+          res.status(500).json({ error: "Deployment finished but failed to save project" });
+      }
     });
     child.on('error', (err) => {
       console.error('Failed to start child process:', err);
