@@ -1,11 +1,9 @@
 const express = require("express");
 const { DefaultAzureCredential } = require("@azure/identity");
 const { ContainerAppsAPIClient } = require("@azure/arm-appcontainers");
-const exce = require("child_process").exec;
-const spawn = require("child_process").spawn;
 const Project = require("../models/project");
+const DeploymentService = require("../services/DeploymentService");
 const router = express.Router();
-
 
 const RUN_ENV = process.env.RUN_ENV || "development";
 
@@ -13,154 +11,113 @@ const RUN_ENV = process.env.RUN_ENV || "development";
 const subscriptionId = process.env.AZURE_SUBSCRIPTION_ID;
 const resourceGroup = process.env.AZURE_RESOURCE_GROUP;
 const jobName = process.env.AZURE_JOB_NAME_DEPLOY;
-let client
+let client;
+
 if (RUN_ENV === "production" && subscriptionId) {
   client = new ContainerAppsAPIClient(new DefaultAzureCredential(), subscriptionId);
 }
 
-// --- API Endpoint to trigger container job ---
+// --- API Endpoint to trigger deployment ---
 router.post("/staticSite", async (req, res) => {
   const { gitURL, slug } = req.body;
   const projectSlug = slug || `proj-${Date.now()}`;
-  console.log("hi")
 
   try {
+    // 1. Initial validation
     const existingProject = await Project.findOne({ name: projectSlug });
     if (existingProject) {
       return res.status(400).json({ error: "A project with this name already exists. Please choose a different name." });
     }
+
+    // 2. Branching based on environment
+    if (RUN_ENV === "production") {
+      // --- PRODUCTION: Azure Container App Jobs ---
+      const BUCKET_NAME = process.env.BUCKET_NAME;
+      const params = {
+        name: jobName,
+        triggerType: "Manual",
+        template: {
+          containers: [{
+              name: "builder-image",
+              image: `deloydashimage.azurecr.io/buildserver:slim`,
+              env: [
+                { name: "REPO_URL", value: gitURL },
+                { name: "JOB_ID", value: projectSlug },
+                { name: "STORAGE_URL", value: process.env.STORAGE_ENDPOINT },
+                { name: "STORAGE_ACCESS_KEY", value: process.env.STORAGE_ACCESS_KEY },
+                { name: "STORAGE_SECRET_KEY", value: process.env.STORAGE_SECRET_KEY },
+                { name: "BUCKET_NAME", value: BUCKET_NAME },
+              ]
+            }]
+        }};
+
+      // await client.jobs.beginStartAndWait(resourceGroup, jobName, params);
+      res.json({
+        status: "queued",
+        data: { projectSlug, url: `http://${projectSlug}.azure.deployment.url/` } // Placeholder
+      });
+
+    } else {
+      // --- DEVELOPMENT/LOCAL: Docker Worker with Queue ---
+      
+      // Create the project record in PENDING state
+      const project = new Project({
+          name: projectSlug,
+          userId: req.user._id,
+          type: 'static-site',
+          status: 'PENDING'
+      });
+      await project.save();
+
+      // Set headers for Server-Sent Events (SSE) for real-time logs
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache, no-transform");
+      res.setHeader("Connection", "keep-alive");
+      res.flushHeaders();
+
+      const keepAliveId = setInterval(() => {
+        res.write(':\n\n'); 
+      }, 15000);
+
+      const buildConfig = {
+          gitURL: gitURL,
+          slug: projectSlug,
+          storageUrl: process.env.STORAGE_ENDPOINT || "http://minio:9000",
+          accessKey: process.env.STORAGE_ACCESS_KEY || "minioadmin",
+          secretKey: process.env.STORAGE_SECRET_KEY || "minioadmin",
+          bucketName: process.env.BUCKET_NAME || "projects"
+      };
+
+      const handle = await DeploymentService.startDeployment(project, buildConfig);
+
+      handle.onLog((log) => {
+          res.write(`data: ${JSON.stringify({ log })}\n\n`);
+      });
+
+      handle.onComplete((data) => {
+          clearInterval(keepAliveId);
+          res.write(`data: ${JSON.stringify({ success: "Deployment finished", url: `http://${projectSlug}.localhost:8000` })}\n\n`);
+          res.end();
+      });
+
+      handle.onError((err) => {
+          clearInterval(keepAliveId);
+          res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+          res.end();
+      });
+
+      req.on("close", () => {
+          clearInterval(keepAliveId);
+      });
+    }
+
   } catch (error) {
-    console.error("Error checking for existing project:", error);
-    return res.status(500).json({ error: "Failed to validate project name." });
-  }
-
-  // bucket name
-  // to-do:- get the bucket name if slug provided 
-  if (RUN_ENV == "production") {
-    console.log("hi")
-    const BUCKET_NAME = process.env.BUCKET_NAME;
-
-    const params = {
-      name: jobName,
-      triggerType: "Manual",
-      template: {
-        containers: [{
-            name: "builder-image",
-            image: `deloydashimage.azurecr.io/buildserver:slim`,
-            env: [
-              { name: "REPO_URL", value: gitURL },
-              { name: "JOB_ID", value: projectSlug },
-              { name: "STORAGE_URL", value: process.env.STORAGE_ENDPOINT },
-              { name: "STORAGE_ACCESS_KEY", value: process.env.STORAGE_ACCESS_KEY },
-              { name: "STORAGE_SECRET_KEY", value: process.env.STORAGE_SECRET_KEY },
-              { name: "BUCKET_NAME", value: BUCKET_NAME },
-            ]
-          }]
-      }};
-
-    // await client.jobs.beginStartAndWait(resourceGroup, jobName, params);
-    // res.json({
-    //   status: "queued",
-    //   data: { projectSlug, url: `http://localhost:443/view/${projectSlug}` }
-      
-    // })
-  } else if (RUN_ENV == "development") {
-    console.log("Development mode: Simulating deployment...");
-
-    // run the deployemnt 
-    // exce(`docker run --rm --link minio \
-    //   -e REPO_URL=${gitURL} \
-    //   -e JOB_ID=${projectSlug} \
-    //   -e STORAGE_URL=${process.env.STORAGE_ENDPOINT} \
-    //   -e STORAGE_ACCESS_KEY=${process.env.STORAGE_ACCESS_KEY} \
-    //   -e STORAGE_SECRET_KEY=${process.env.STORAGE_SECRET_KEY} \
-    //   -e BUCKET_NAME=${process.env.BUCKET_NAME} \
-    //   buildserver:latest`, (error, stdout, stderr) => {
-    //     if (error) {
-    //       console.error(`Error executing deploy script: ${error.message}`);
-    //       return res.status(500).send("Deployment failed");
-    //     }
-    //     // if (stderr) {
-    //     //   console.error(`Deploy script stderr: ${stderr}`);
-    //     //   return res.status(500).send("Deployment encountered issues");
-    //     // }
-    //     console.log(`Deploy script output: ${stdout}`);
-    //     res.status(200).json({
-    //       status: "queued",
-    //       data: { projectSlug, url: `http://localhost:443/view/${projectSlug}` }
-    //     });
-    //   });
-    // Set headers for Server-Sent Events (SSE)
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache, no-transform");
-    res.setHeader("Connection", "keep-alive");
-    res.flushHeaders(); // Ensure headers are sent immediately to establish the stream
-
-    // Send a comment every 15 seconds to keep the connection alive through proxies
-    const keepAliveId = setInterval(() => {
-      res.write(':\n\n'); 
-    }, 15000);
-
-    const child = spawn(`docker run --rm --link minio \
-      -e REPO_URL=${gitURL} \
-      -e JOB_ID=${projectSlug} \
-      -e STORAGE_URL=${process.env.STORAGE_ENDPOINT} \
-      -e STORAGE_ACCESS_KEY=${process.env.STORAGE_ACCESS_KEY} \
-      -e STORAGE_SECRET_KEY=${process.env.STORAGE_SECRET_KEY} \
-      -e BUCKET_NAME=${process.env.BUCKET_NAME} \
-      buildserver:latest`, { shell: true })
-      
-    child.stdout.on('data', (data) => {
-      const output = data.toString();
-      console.log(`stdout (real time): ${output}`);
-      res.write(`data: ${JSON.stringify({ log: output })}\n\n`);
-    })
-    
-    child.stderr.on('data', (data) => {
-      const output = data.toString();
-      console.error(`stderr (real time): ${output}`);
-      res.write(`data: ${JSON.stringify({ log: output })}\n\n`);
-    });
-    
-    child.on('close', async (code) => {
-      console.log(`child process closed with code ${code}`);
-      
-      try {
-          const status = code === 0 ? 'active' : 'error';
-          const url = `http://${projectSlug}.localhost:7830/`;
-
-          const project = await Project.create({
-              userId: req.user._id,
-              name: projectSlug,
-              type: 'static-site', // Defaulting to static-site based on the endpoint, you might want it from frontend
-              url: code === 0 ? url : null,
-              status: status,
-              lastDeployed: new Date()
-          });
-
-          if (code === 0) {
-              res.write(`data: ${JSON.stringify({ status: "queued", data: { projectSlug, url } })}\n\n`);
-          } else {
-              res.write(`data: ${JSON.stringify({ error: "Build process failed with non-zero exit code" })}\n\n`);
-          }
-      } catch (err) {
-          console.error('Error saving project to DB:', err);
-          res.write(`data: ${JSON.stringify({ error: "Deployment finished but failed to save project" })}\n\n`);
-      }
-      clearInterval(keepAliveId);
-      res.end();
-    });
-    
-    child.on('error', (err) => {
-      console.error('Failed to start child process:', err);
-      res.write(`data: ${JSON.stringify({ error: "Failed to start deployment process" })}\n\n`);
-      clearInterval(keepAliveId);
-      res.end();
-    });
-
-  } else {
-    console.log("Invalid RUN_ENV configuration.");
-    res.status(500).send("Server configuration not set.");
+    console.error("Error in deployment route:", error);
+    if (!res.headersSent) {
+        return res.status(500).json({ error: "Failed to initiate deployment process." });
+    }
+    res.write(`data: ${JSON.stringify({ error: "Internal server error during deployment orchestration" })}\n\n`);
+    res.end();
   }
 });
 
