@@ -1,22 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deploy-backend
+  name: deploydash-backend
   namespace: default
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: deploy-backend
+      app: deploydash-backend
   template:
     metadata:
       labels:
-        app: deploy-backend
+        app: deploydash-backend
     spec:
       serviceAccountName: deploy-backend-sa
+      nodeSelector:
+        kubernetes.io/hostname: nst-n1
       containers:
       - name: backend
         image: pandaincode/deploy-backend:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 7830
         env:
@@ -45,13 +48,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: deploy-backend-service
+  name: deploydash-backend
   namespace: default
 spec:
   selector:
-    app: deploy-backend
+    app: deploydash-backend
   ports:
   - protocol: TCP
     port: 80
     targetPort: 7830
-  type: ClusterIP
+    nodePort: 30111
+  type: NodePort
