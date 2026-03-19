@@ -1,4 +1,5 @@
 const DockerProvider = require("./DockerProvider");
+const K8sProvider = require("./K8sProvider");
 const QueueService = require("./QueueService");
 const DeploymentHandle = require("./DeploymentHandle");
 const Project = require("../models/project");
@@ -7,7 +8,7 @@ class DeploymentService {
     constructor() {
         this.providers = {
             docker: new DockerProvider(),
-            // k8s: new K8sProvider() // Future implementation
+            k8s: new K8sProvider() 
         };
     }
 
@@ -20,9 +21,9 @@ class DeploymentService {
         // 1. Create a job-specific handle for the route to listen to
         const handle = new DeploymentHandle(projectData.name);
 
-        // 2. Select provider (defaulting to docker for now)
-        const providerName = process.env.RUN_ENV === 'production' ? 'docker' : 'docker';
-        const provider = this.providers[providerName];
+        // 2. Select provider (k8s | docker)
+        const strategy = process.env.DEPLOY_STRATEGY || 'docker';
+        const provider = this.providers[strategy];
 
         if (!provider) {
             throw new Error(`Provider ${providerName} not found`);

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-backend
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: deploy-backend
+  template:
+    metadata:
+      labels:
+        app: deploy-backend
+    spec:
+      serviceAccountName: deploy-backend-sa
+      containers:
+      - name: backend
+        image: pandaincode/deploy-backend:latest
+        ports:
+        - containerPort: 7830
+        env:
+        - name: DEPLOY_STRATEGY
+          value: "k8s"
+        - name: PORT
+          value: "7830"
+        - name: MONGODB_URI
+          value: "mongodb://mongodb-service:27017/deployDash"
+        - name: STORAGE_ENDPOINT
+          value: "http://minio-service:9000"
+        - name: STORAGE_ACCESS_KEY
+          value: "YOUR_MINIO_ACCESS_KEY"
+        - name: STORAGE_SECRET_KEY
+          value: "YOUR_MINIO_SECRET_KEY"
+        - name: BUCKET_NAME
+          value: "projects"
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: deploy-backend-service
+  namespace: default
+spec:
+  selector:
+    app: deploy-backend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 7830
+  type: ClusterIP

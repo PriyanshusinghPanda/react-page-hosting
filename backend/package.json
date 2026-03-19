@@ -14,6 +14,7 @@
   "dependencies": {
     "@azure/arm-appcontainers": "^2.2.0",
     "@azure/identity": "^4.13.0",
+    "@kubernetes/client-node": "^1.4.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cookies-parser": "^1.2.0",
