@@ -30,7 +30,7 @@ spec:
         - name: MONGODB_URI
           value: "mongodb://mongodb-service:27017/deployDash"
         - name: STORAGE_ENDPOINT
-          value: "http://minio-service:9000"
+          value: "http://s3-pandaincode.nstsdc.org/"
         - name: STORAGE_ACCESS_KEY
           value: "YOUR_MINIO_ACCESS_KEY"
         - name: STORAGE_SECRET_KEY
@@ -57,5 +57,5 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 7830
-    nodePort: 30111
+    nodePort: 30112
   type: NodePort
