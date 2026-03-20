@@ -39,22 +39,33 @@ class QueueService {
         const { project, config, provider, handle } = job;
 
         try {
-            // Update status to BUILDING
+            // Update status to BUILDING and clear old logs
             project.status = 'BUILDING';
+            project.logs = ["Starting build process..."];
             await project.save();
+            
             LogService.appendLog(project.name, "Starting build process...");
 
             const deploymentHandle = provider.deploy(config);
 
             // Link the provider's handle to our internal handle
-            deploymentHandle.onLog((log) => {
+            deploymentHandle.onLog(async (log) => {
                 LogService.appendLog(project.name, log);
                 handle.emitLog(log);
+                
+                // Persist logs to DB
+                try {
+                    await Project.updateOne(
+                        { _id: project._id },
+                        { $push: { logs: log } }
+                    );
+                } catch (e) {
+                    console.error("Failed to persist log line:", e);
+                }
             });
 
-            deploymentHandle.onComplete(async (data) => {
-                project.status = 'DEPLOYED';
-                project.url = `http://${project.name}.localhost:8000`; // Placeholder
+                const baseDomain = process.env.DEPLOY_DOMAIN || "api-deploydash.nstsdc.org";
+                project.url = `https://${project.name}.${baseDomain}`;
                 await project.save();
                 LogService.appendLog(project.name, "Deployment successful!");
                 handle.emitComplete(data);

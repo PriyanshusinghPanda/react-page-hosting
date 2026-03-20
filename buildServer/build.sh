@@ -17,6 +17,6 @@ mc alias set minio $STORAGE_URL $STORAGE_ACCESS_KEY $STORAGE_SECRET_KEY
 # check if it does not exist and create if not yaaa
 mc mb -p minio/$BUCKET_NAME || echo "Bucket $BUCKET_NAME already exists, skipping creation"
 # upload the build
-mc cp -r ./dist minio/$BUCKET_NAME/$JOB_ID/
+mc cp -r ./${OUTPUT_DIR:-dist} minio/$BUCKET_NAME/$JOB_ID/
 
 echo "#step-6 \t Cleaning up => exiting"

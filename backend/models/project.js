@@ -26,6 +26,10 @@ const projectSchema = new mongoose.Schema({
     lastDeployed: {
         type: Date,
         default: Date.now
+    },
+    logs: {
+        type: [String],
+        default: []
     }
 }, { timestamps: true });
 

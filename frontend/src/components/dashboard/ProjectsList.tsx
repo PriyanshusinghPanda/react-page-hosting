@@ -21,22 +21,31 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { 
+  Terminal, 
+  ChevronRight, 
+  History,
+  Activity
+} from "lucide-react";
 import api from "../../lib/api";
 
 
 interface Project {
   id: string;
   name: string;
-  type: "frontend" | "backend";
+  type: "static-site" | "web-service" | "email-service" | "frontend" | "backend";
   url?: string;
-  status: "active" | "building" | "error";
+  status: string;
   lastDeployed: string;
+  logs: string[];
 }
 
 export function ProjectsList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLogsOpen, setIsLogsOpen] = useState(false);
+  const [selectedLogs, setSelectedLogs] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -50,6 +59,7 @@ export function ProjectsList() {
           url: p.url,
           status: p.status,
           lastDeployed: new Date(p.lastDeployed || p.createdAt).toLocaleString(),
+          logs: p.logs || [],
         }));
         setProjects(fetchedProjects);
       } catch (error) {
@@ -184,7 +194,14 @@ export function ProjectsList() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        // For now we'll just alert or show them inline
+                        setSelectedLogs(project.logs);
+                        setIsLogsOpen(true);
+                      }}>
+                        <Terminal className="w-4 h-4 mr-2" />
+                        View Build Logs
+                      </DropdownMenuItem>
                       <DropdownMenuItem>Settings</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
                         <Trash2 className="w-4 h-4 mr-2" />
@@ -198,6 +215,43 @@ export function ProjectsList() {
           </div>
         )}
       </div>
+
+      {/* Logs Modal Overlay */}
+      {isLogsOpen && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border-2 border-primary/30 w-full max-w-4xl h-[80vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+            <div className="p-6 border-b-2 border-border flex items-center justify-between bg-muted/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border-2 border-primary/20">
+                  <Terminal className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">Build History</h3>
+                  <p className="text-xs text-muted-foreground uppercase tracking-widest">Deployment Logs</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setIsLogsOpen(false)} className="rounded-full hover:bg-destructive/10 hover:text-destructive">
+                <Plus className="w-6 h-6 rotate-45" />
+              </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 bg-black font-mono text-sm text-green-400 custom-scrollbar">
+              {selectedLogs.length === 0 ? (
+                <div className="text-muted-foreground italic">No logs found for this project.</div>
+              ) : (
+                selectedLogs.map((log, i) => (
+                  <div key={i} className="mb-1 border-l-2 border-green-500/20 pl-3 py-0.5 hover:bg-green-500/5 transition-colors">
+                    <span className="text-green-800 mr-3 select-none">[{i+1}]</span>
+                    {log}
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="p-4 border-t-2 border-border flex justify-end bg-muted/20">
+              <Button onClick={() => setIsLogsOpen(false)} variant="secondary">Close Viewer</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -17,7 +17,7 @@ class K8sProvider extends DeploymentProvider {
      * @returns {DeploymentHandle}
      */
     deploy(config) {
-        const { gitURL, slug, storageUrl, accessKey, secretKey, bucketName } = config;
+        const { gitURL, slug, storageUrl, accessKey, secretKey, bucketName, outputDir } = config;
         const handle = new DeploymentHandle(slug);
         const jobName = `deploy-job-${slug.toLowerCase()}-${Date.now()}`;
 
@@ -79,46 +79,81 @@ class K8sProvider extends DeploymentProvider {
     }
 
     async streamLogs(jobName, handle) {
-        try {
-            // 1. Wait for the pod to be created and in 'Running' or 'Succeeded/Failed' state
-            let podName = null;
-            while (!podName) {
+        let lastLogLength = 0;
+        let jobCompleted = false;
+
+        const pollLogic = async () => {
+            if (jobCompleted) return;
+
+            try {
+                // 1. Check Job Status
+                const jobStatus = await this.batchApi.readNamespacedJobStatus({
+                    name: jobName,
+                    namespace: this.namespace
+                });
+
+                if (jobStatus.status && jobStatus.status.succeeded > 0) {
+                    jobCompleted = true;
+                    handle.emitComplete({ jobId: jobName });
+                    setTimeout(() => this.cleanup(jobName), 10000);
+                    return;
+                } else if (jobStatus.status && jobStatus.status.failed > 0) {
+                    jobCompleted = true;
+                    handle.emitError(new Error("Build job failed in Kubernetes. Check logs for details."));
+                    setTimeout(() => this.cleanup(jobName), 10000);
+                    return;
+                }
+
+                // 2. Fetch Logs from Pod
                 const pods = await this.coreApi.listNamespacedPod({
                     namespace: this.namespace,
                     labelSelector: `job-name=${jobName}`
                 });
+
                 if (pods.items && pods.items.length > 0) {
-                    podName = pods.items[0].metadata.name;
-                    handle.emitLog(`Targeting pod: ${podName}...`);
-                } else {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-            }
+                    const pod = pods.items[0];
+                    const podName = pod.metadata.name;
 
-            // 2. Stream logs from the pod
-            const logStream = new k8s.Log(this.kc);
-            const stream = await logStream.log(this.namespace, podName, 'builder-container', process.stdout, { follow: true });
+                    if (pod.status.phase === 'Running' || pod.status.phase === 'Succeeded' || pod.status.phase === 'Failed') {
+                        try {
+                            const logResponse = await this.coreApi.readNamespacedPodLog({
+                                name: podName,
+                                namespace: this.namespace,
+                                container: 'builder-container'
+                            });
 
-            // Since logStream.log can be tricky to capture directly into handle, we can use a custom approach or listen to events
-            // For now, we'll use listNamespacedPod to watch status and end the handle on completion
-            const watch = new k8s.Watch(this.kc);
-            watch.watch(`/api/v1/namespaces/${this.namespace}/pods`, 
-                { labelSelector: `job-name=${jobName}` },
-                (type, obj) => {
-                    if (obj.status.phase === 'Succeeded') {
-                        handle.emitComplete({ jobId: jobName });
-                    } else if (obj.status.phase === 'Failed') {
-                        handle.emitError(new Error("Build job failed inside Kubernetes."));
+                            const fullLog = (logResponse && typeof logResponse === 'object' && logResponse.body !== undefined) 
+                                ? logResponse.body 
+                                : logResponse;
+
+                            if (fullLog && typeof fullLog === 'string' && fullLog.length > lastLogLength) {
+                                const newContent = fullLog.substring(lastLogLength);
+                                const lines = newContent.split('\n');
+                                lines.forEach((line, index) => {
+                                    if (line || index < lines.length - 1) {
+                                        handle.emitLog(line);
+                                    }
+                                });
+                                lastLogLength = fullLog.length;
+                            }
+                        } catch (logErr) {
+                            // console.error("Log fetch error:", logErr);
+                        }
                     }
-                },
-                (err) => {
-                    if (err) console.error('Watch error:', err);
                 }
-            );
+            } catch (err) {
+                console.error("Polling error:", err);
+            }
+        };
 
-        } catch (error) {
-            handle.emitError(error);
-        }
+        // Run immediately then start interval
+        pollLogic();
+        const pollInterval = setInterval(pollLogic, 3000);
+
+        handle.onCancel(() => {
+            clearInterval(pollInterval);
+            jobCompleted = true;
+        });
     }
 
     async cleanup(jobId) {

@@ -12,15 +12,28 @@ router.get("/", async (req, res) => {
         res.status(500).json({ error: "Internal server error." });
     }
 });
+const RESERVED_NAMES = [
+    'api', 'backend', 'frontend', 'dash', 'dashboard', 'www', 
+    'minio', 'amazon', 'mongodb', 'postgres', 'redis', 
+    'auth', 'login', 'admin', 'status', 'health'
+];
+
 router.get("/check-name", async (req, res) => {
     try {
         const { name } = req.query;
         if (!name) {
             return res.status(400).json({ error: "Project name is required" });
         }
+
+        const slug = name.toLowerCase();
         
-        // Check if any project exists with this name globally
-        const existingProject = await Project.findOne({ name });
+        // 1. Check reserved names
+        if (RESERVED_NAMES.includes(slug)) {
+            return res.status(200).json({ available: false, error: "This name is reserved by the platform." });
+        }
+
+        // 2. Check if any project exists with this name globally
+        const existingProject = await Project.findOne({ name: slug });
         res.status(200).json({ available: !existingProject });
     } catch (error) {
         console.error("Error checking project name:", error);

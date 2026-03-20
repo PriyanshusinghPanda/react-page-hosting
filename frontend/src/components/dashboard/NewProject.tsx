@@ -526,16 +526,28 @@ export function NewProject() {
               </div>
 
               {/* Logs Viewer */}
-              {isDeploying && (
-                <div className="mt-8 bg-black/90 p-4 rounded-xl border border-gray-800 font-mono text-sm text-green-400 h-64 overflow-y-auto">
-                  {logs.length === 0 ? (
-                    <div className="animate-pulse">Starting build environment...</div>
-                  ) : (
-                    logs.map((log, i) => (
-                      <div key={i} className="whitespace-pre-wrap">{log}</div>
-                    ))
-                  )}
-                  <div ref={logsEndRef} />
+              {(isDeploying || logs.length > 0) && (
+                <div className="mt-8">
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="text-sm font-medium">Deployment Logs</Label>
+                    {!isDeploying && (
+                      <span className="text-xs text-green-500 font-bold animate-pulse">
+                        DEPLOYMENT COMPLETE
+                      </span>
+                    )}
+                  </div>
+                  <div className="bg-black/90 p-4 rounded-xl border border-gray-800 font-mono text-sm text-green-400 h-80 overflow-y-auto shadow-inner custom-scrollbar">
+                    {logs.length === 0 ? (
+                      <div className="animate-pulse">Initializing build environment...</div>
+                    ) : (
+                      logs.map((log, i) => (
+                        <div key={i} className="whitespace-pre-wrap border-l-2 border-green-500/20 pl-2 mb-1 hover:bg-green-500/5 transition-colors">
+                          {log}
+                        </div>
+                      ))
+                    )}
+                    <div ref={logsEndRef} />
+                  </div>
                 </div>
               )}
             </div>

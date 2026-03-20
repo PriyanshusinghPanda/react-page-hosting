@@ -19,7 +19,7 @@ if (RUN_ENV === "production" && subscriptionId) {
 
 // --- API Endpoint to trigger deployment ---
 router.post("/staticSite", async (req, res) => {
-  const { gitURL, slug } = req.body;
+  const { gitURL, slug, outputDir } = req.body;
   const projectSlug = slug || `proj-${Date.now()}`;
 
   try {
@@ -82,6 +82,7 @@ router.post("/staticSite", async (req, res) => {
       const buildConfig = {
           gitURL: gitURL,
           slug: projectSlug,
+          outputDir: outputDir || 'dist',
           storageUrl: process.env.STORAGE_ENDPOINT || "http://minio:9000",
           accessKey: process.env.STORAGE_ACCESS_KEY || "minioadmin",
           secretKey: process.env.STORAGE_SECRET_KEY || "minioadmin",
