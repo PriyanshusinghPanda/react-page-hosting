@@ -58,18 +58,28 @@ app.use("/user", userRoute);
 app.use("/project", authUser, projectRoute);
 
 // app.use("/view", viewRoute);
+const RESERVED_NAMES = [
+  'api', 'backend', 'frontend', 'dash', 'dashboard', 'www', 
+  'minio', 'amazon', 'mongodb', 'postgres', 'redis', 
+  'auth', 'login', 'admin', 'status', 'health', 'api-deploydash'
+];
+
 app.use((req, res, next) => {
-  console.log("Subdomains:", req.subdomains, req.get("host"), req.hostname);
   const hostname = req.hostname;
-  const subdomain = hostname.split(".")[0];
-  // task :- logic for checking the subdomain existing in the storage can be done either
-  // here or in the view route itself
-  if (subdomain && subdomain !== "localhost") {
-    console.log("hi");
-    viewRoute(req, res, next);
-  } else {
-    next();
+  // If we are on the base domain with no subdomain, or purely on localhost, skip
+  if (hostname === "api-deploydash.nstsdc.org" || hostname === "localhost" || hostname === "127.0.0.1") {
+    return next();
   }
+
+  const subdomain = hostname.split(".")[0].toLowerCase();
+  
+  // If it's a reserved platform name, don't treat it as a project site
+  if (subdomain && !RESERVED_NAMES.includes(subdomain)) {
+    console.log(`[Routing] Request for project site: ${subdomain}`);
+    return viewRoute(req, res, next);
+  }
+  
+  next();
 });
 
 app.get("/health", (req, res) => {
