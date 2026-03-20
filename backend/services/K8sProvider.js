@@ -19,7 +19,7 @@ class K8sProvider extends DeploymentProvider {
     deploy(config) {
         const { gitURL, slug, storageUrl, accessKey, secretKey, bucketName } = config;
         const handle = new DeploymentHandle(slug);
-        const jobName = `deploy-job-${slug}-${Date.now()}`;
+        const jobName = `deploy-job-${slug.toLowerCase()}-${Date.now()}`;
 
         const jobSpec = {
             apiVersion: 'batch/v1',
@@ -62,7 +62,10 @@ class K8sProvider extends DeploymentProvider {
             },
         };
 
-        this.batchApi.createNamespacedJob(this.namespace, jobSpec)
+        this.batchApi.createNamespacedJob({
+            namespace: this.namespace,
+            body: jobSpec
+        })
             .then(async (response) => {
                 handle.emitLog(`Kubernetes Job created: ${jobName}`);
                 await this.streamLogs(jobName, handle);
@@ -80,9 +83,12 @@ class K8sProvider extends DeploymentProvider {
             // 1. Wait for the pod to be created and in 'Running' or 'Succeeded/Failed' state
             let podName = null;
             while (!podName) {
-                const pods = await this.coreApi.listNamespacedPod(this.namespace, undefined, undefined, undefined, undefined, `job-name=${jobName}`);
-                if (pods.body.items.length > 0) {
-                    podName = pods.body.items[0].metadata.name;
+                const pods = await this.coreApi.listNamespacedPod({
+                    namespace: this.namespace,
+                    labelSelector: `job-name=${jobName}`
+                });
+                if (pods.items && pods.items.length > 0) {
+                    podName = pods.items[0].metadata.name;
                     handle.emitLog(`Targeting pod: ${podName}...`);
                 } else {
                     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -119,7 +125,11 @@ class K8sProvider extends DeploymentProvider {
         // Cleanup the job after completion (standard practice)
         console.log(`Cleaning up K8s Job for ${jobId}`);
         try {
-            await this.batchApi.deleteNamespacedJob(jobId, this.namespace, undefined, undefined, undefined, undefined, 'Background');
+            await this.batchApi.deleteNamespacedJob({
+                name: jobId,
+                namespace: this.namespace,
+                propagationPolicy: 'Background'
+            });
         } catch (error) {
             console.error('Cleanup error:', error);
         }
