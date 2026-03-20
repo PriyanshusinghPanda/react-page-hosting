@@ -19,7 +19,7 @@ spec:
       containers:
       - name: backend
         image: pandaincode/deploy-backend:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 7830
         env:
