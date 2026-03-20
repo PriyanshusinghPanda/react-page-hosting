@@ -39,6 +39,8 @@ spec:
           value: "amazon"
         - name: BUILDER_IMAGE
           value: "pandaincode/deploy-builder:latest"
+        - name: DEPLOY_DOMAIN
+          value: "api-deploydash.nstsdc.org"
         resources:
           limits:
             cpu: "500m"
