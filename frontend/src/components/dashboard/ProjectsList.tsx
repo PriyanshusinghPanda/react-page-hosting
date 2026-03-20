@@ -39,7 +39,7 @@ export function ProjectsList() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await axios.get("http://localhost:7830/project", { withCredentials: true });
+        const response = await api.get("/project");
         // Map the backend projects to the frontend structure
         const fetchedProjects = response.data.projects.map((p: any) => ({
           id: p._id,
