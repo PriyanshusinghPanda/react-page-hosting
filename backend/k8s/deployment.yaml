@@ -18,8 +18,8 @@ spec:
         kubernetes.io/hostname: nst-n1
       containers:
       - name: backend
-        image: pandaincode/deploy-backend:latest
-        imagePullPolicy: Always
+        image: deploydash-backend:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 7830
         env:
