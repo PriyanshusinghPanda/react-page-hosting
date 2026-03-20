@@ -38,7 +38,7 @@ spec:
         - name: BUCKET_NAME
           value: "amazon"
         - name: BUILDER_IMAGE
-          value: "docker.io/library/deploy-builder:latest"
+          value: "deploy-builder:latest"
         - name: DEPLOY_DOMAIN
           value: "api-deploydash.nstsdc.org"
         resources:
