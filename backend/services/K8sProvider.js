@@ -30,6 +30,7 @@ class K8sProvider extends DeploymentProvider {
                             env: [
                                 { name: 'REPO_URL', value: gitURL },
                                 { name: 'JOB_ID', value: slug },
+                                { name: 'STORAGE_URL', value: storageUrl },
                                 { name: 'MINIO_ACCESS_KEY', value: accessKey },
                                 { name: 'MINIO_SECRET_KEY', value: secretKey },
                                 { name: 'BUCKET_NAME', value: bucketName },
@@ -99,7 +100,7 @@ class K8sProvider extends DeploymentProvider {
                                 lastLogLength = logText.length;
                             }
                         } catch (logErr) {
-                            // Logs might not be ready yet, keep polling
+                            console.error('[K8sProvider] Pod log fetch error:', logErr.message || logErr);
                         }
                     }
 

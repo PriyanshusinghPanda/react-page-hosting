@@ -13,7 +13,7 @@ npm run build
 
 echo "#step-4 \t uploading the build server"
 
-mc alias set minio $STORAGE_URL $STORAGE_ACCESS_KEY $STORAGE_SECRET_KEY
+mc alias set minio "$STORAGE_URL" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY" --api S3v4
 # check if it does not exist and create if not yaaa
 mc mb -p minio/$BUCKET_NAME || echo "Bucket $BUCKET_NAME already exists, skipping creation"
 # upload the build
