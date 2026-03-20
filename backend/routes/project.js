@@ -41,4 +41,22 @@ router.get("/check-name", async (req, res) => {
     }
 });
 
+router.get("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const project = await Project.findOne({ _id: id, userId: req.user._id });
+        if (!project) {
+            return res.status(404).json({ error: "Project not found" });
+        }
+        res.status(200).json({ 
+            logs: project.logs, 
+            status: project.status,
+            url: project.url 
+        });
+    } catch (error) {
+        console.error("Error fetching project logs:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+});
+
 module.exports = router;

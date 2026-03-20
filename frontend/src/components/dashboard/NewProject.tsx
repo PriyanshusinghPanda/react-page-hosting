@@ -156,19 +156,47 @@ export function NewProject() {
     setEnvVars(updated);
   };
 
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+
+  // Polling for logs
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (activeProjectId && isDeploying) {
+      intervalId = setInterval(async () => {
+        try {
+          const res = await api.get(`/project/${activeProjectId}`);
+          const { logs: newLogs, status, url } = res.data;
+          
+          setLogs(newLogs || []);
+          
+          if (status === 'DEPLOYED') {
+            setIsDeploying(false);
+            setActiveProjectId(null);
+            clearInterval(intervalId);
+            setLogs(prev => [...prev, `\n🚀 Success! Site live at ${url}`]);
+            setTimeout(() => router.push("/dashboard"), 3000);
+          } else if (status === 'FAILED') {
+            setIsDeploying(false);
+            setActiveProjectId(null);
+            clearInterval(intervalId);
+            setLogs(prev => [...prev, `\n❌ Deployment failed. Check logs above.`]);
+          }
+        } catch (err) {
+          console.error("Polling error:", err);
+        }
+      }, 2000);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [activeProjectId, isDeploying, router]);
+
   const handleDeploy = async () => {
-    console.log({
-      serviceType,
-      gitUrl,
-      projectName,
-      branch,
-      buildCommand,
-      startCommand,
-      outputDir,
-      envVars,
-    });
     setIsDeploying(true);
-    setLogs([]);
+    setLogs(["Initiating deployment..."]);
+    
     try {
       const routeMap: Record<string, string> = {
         "static-site": "staticSite",
@@ -181,73 +209,26 @@ export function NewProject() {
       };
       const typeKey = serviceType ? routeMap[serviceType] || "staticSite" : "staticSite";
       
-      const baseURL = api.defaults.baseURL || "https://api-deploydash.nstsdc.org";
-      const response = await fetch(`${baseURL}/deploy/${typeKey}`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token') || ''}`,
-        },
-        body: JSON.stringify({
-          gitURL : gitUrl,
-          slug : projectName,
-          startCommand : startCommand,
-          buildCommand : buildCommand,
-          outputDir : outputDir,
-          envVars : envVars
-        })
+      const res = await api.post(`/deploy/${typeKey}`, {
+        gitURL: gitUrl,
+        slug: projectName,
+        startCommand: startCommand,
+        buildCommand: buildCommand,
+        outputDir: outputDir,
+        envVars: envVars
       });
 
-      if (!response.ok) {
-        // Try to parse the error message if the backend sent JSON
-        try {
-          const errData = await response.json();
-          throw new Error(errData.error || `HTTP error! status: ${response.status}`);
-        } catch(e) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+      if (res.data.projectId) {
+        setActiveProjectId(res.data.projectId);
+        setLogs(prev => [...prev, "Queued... waiting for builder pod."]);
+      } else {
+        throw new Error("No project ID returned from server");
       }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (reader) {
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          // SSE events look like "data: some log text\n\n"
-          const lines = chunk.split('\n');
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              try {
-                const parsed = JSON.parse(data);
-                if (parsed.status === 'queued') {
-                  setLogs((prev) => [...prev, `Deployment queued: ${parsed.data.url}`]);
-                  setTimeout(() => router.push("/dashboard"), 2000);
-                  return;
-                } else if (parsed.error) {
-                  setLogs((prev) => [...prev, `Error: ${parsed.error}`]);
-                  setIsDeploying(false);
-                  return;
-                } else if (parsed.log) {
-                  setLogs((prev) => [...prev, parsed.log]);
-                }
-              } catch (e) {
-                // Not valid JSON, just a plain string log
-                setLogs((prev) => [...prev, data]);
-              }
-            }
-          }
-        }
-      }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Deployment error:", error);
-      setLogs((prev) => [...prev, `Client error: ${error}`]);
+      setLogs((prev) => [...prev, `Error: ${error.response?.data?.error || error.message}`]);
+      setIsDeploying(false);
     }
-    setIsDeploying(false);
   };
 
   return (

@@ -86,25 +86,7 @@ class K8sProvider extends DeploymentProvider {
             if (jobCompleted) return;
 
             try {
-                // 1. Check Job Status
-                const jobStatus = await this.batchApi.readNamespacedJobStatus({
-                    name: jobName,
-                    namespace: this.namespace
-                });
-
-                if (jobStatus.status && jobStatus.status.succeeded > 0) {
-                    jobCompleted = true;
-                    handle.emitComplete({ jobId: jobName });
-                    setTimeout(() => this.cleanup(jobName), 10000);
-                    return;
-                } else if (jobStatus.status && jobStatus.status.failed > 0) {
-                    jobCompleted = true;
-                    handle.emitError(new Error("Build job failed in Kubernetes. Check logs for details."));
-                    setTimeout(() => this.cleanup(jobName), 10000);
-                    return;
-                }
-
-                // 2. Fetch Logs from Pod
+                // 1. ALWAYS try to fetch logs first
                 const pods = await this.coreApi.listNamespacedPod({
                     namespace: this.namespace,
                     labelSelector: `job-name=${jobName}`
@@ -137,9 +119,27 @@ class K8sProvider extends DeploymentProvider {
                                 lastLogLength = fullLog.length;
                             }
                         } catch (logErr) {
-                            // console.error("Log fetch error:", logErr);
+                            // Silently ignore log fetch errors
                         }
                     }
+                }
+
+                // 2. Check Job Status AFTER log attempt
+                const jobStatus = await this.batchApi.readNamespacedJobStatus({
+                    name: jobName,
+                    namespace: this.namespace
+                });
+
+                if (jobStatus.status && jobStatus.status.succeeded > 0) {
+                    jobCompleted = true;
+                    handle.emitComplete({ jobId: jobName });
+                    setTimeout(() => this.cleanup(jobName), 10000);
+                    return;
+                } else if (jobStatus.status && jobStatus.status.failed > 0) {
+                    jobCompleted = true;
+                    handle.emitError(new Error("Build job failed in Kubernetes. Check logs for details."));
+                    setTimeout(() => this.cleanup(jobName), 10000);
+                    return;
                 }
             } catch (err) {
                 console.error("Polling error:", err);
