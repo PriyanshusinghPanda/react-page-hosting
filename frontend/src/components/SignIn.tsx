@@ -8,7 +8,7 @@ import { Sticker } from "./Sticker";
 import { Sparkles, Heart, Star, Github, Mail, Lock, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import api from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
 export function SignIn() {
@@ -20,10 +20,10 @@ export function SignIn() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:7830/user/login", {
+      const response = await api.post("/user/login", {
         email,
         password,
-      }, { withCredentials: true });
+      });
       console.log("Sign in success:", response.data);
       // Update auth context with user data
       login(response.data.user);

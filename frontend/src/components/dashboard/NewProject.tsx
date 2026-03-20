@@ -181,7 +181,8 @@ export function NewProject() {
       };
       const typeKey = serviceType ? routeMap[serviceType] || "staticSite" : "staticSite";
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:7830"}/deploy/${typeKey}`, {
+      const baseURL = api.defaults.baseURL || "https://api-deploydash.nstsdc.org";
+      const response = await fetch(`${baseURL}/deploy/${typeKey}`, {
         method: "POST",
         credentials: "include",
         headers: {

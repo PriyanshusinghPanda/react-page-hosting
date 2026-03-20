@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import axios from "axios";
+import api from "@/lib/api";
 
 interface User {
     username: string;
@@ -32,9 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const checkAuth = async () => {
         try {
-            const response = await axios.get("http://localhost:7830/user/profile", {
-                withCredentials: true,
-            });
+            const response = await api.get("/user/profile");
             setUser(response.data.user);
         } catch {
             setUser(null);
@@ -53,9 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const logout = async () => {
         try {
-            await axios.post("http://localhost:7830/user/logout", {}, {
-                withCredentials: true,
-            });
+            await api.post("/user/logout", {});
         } catch (error) {
             console.error("Logout error:", error);
         } finally {

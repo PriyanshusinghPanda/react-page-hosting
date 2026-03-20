@@ -8,7 +8,7 @@ import { Sticker } from "./Sticker";
 import { Rocket, Sparkles, Heart, Github, Mail, Lock, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import api from "@/lib/api";
 
 export function SignUp() {
   const router = useRouter();
@@ -19,7 +19,7 @@ export function SignUp() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:7830/user/signup", {
+      const response = await api.post("/user/signup", {
         username: name,
         email,
         password,
