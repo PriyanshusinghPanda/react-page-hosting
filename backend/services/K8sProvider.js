@@ -26,7 +26,8 @@ class K8sProvider extends DeploymentProvider {
                     spec: {
                         containers: [{
                             name: 'builder-container',
-                            image: process.env.BUILDER_IMAGE || 'pandaincode/deploy-builder:latest',
+                            image: process.env.BUILDER_IMAGE || 'deploy-builder:latest',
+                            imagePullPolicy: 'Never',
                             env: [
                                 { name: 'REPO_URL', value: gitURL },
                                 { name: 'JOB_ID', value: slug },
