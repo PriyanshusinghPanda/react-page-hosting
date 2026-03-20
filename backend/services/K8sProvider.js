@@ -82,18 +82,23 @@ class K8sProvider extends DeploymentProvider {
         let lastLogLength = 0;
         let jobCompleted = false;
 
+        let intervalId;
         const pollLogic = async () => {
-            if (jobCompleted) return;
+            if (jobCompleted) {
+                if (intervalId) clearInterval(intervalId);
+                return;
+            }
 
             try {
                 // 1. ALWAYS try to fetch logs first
-                const pods = await this.coreApi.listNamespacedPod({
+                const podList = await this.coreApi.listNamespacedPod({
                     namespace: this.namespace,
                     labelSelector: `job-name=${jobName}`
                 });
 
-                if (pods.items && pods.items.length > 0) {
-                    const pod = pods.items[0];
+                const pods = podList.body.items || [];
+                if (pods.length > 0) {
+                    const pod = pods[0];
                     const podName = pod.metadata.name;
 
                     if (pod.status.phase === 'Running' || pod.status.phase === 'Succeeded' || pod.status.phase === 'Failed') {
@@ -104,9 +109,7 @@ class K8sProvider extends DeploymentProvider {
                                 container: 'builder-container'
                             });
 
-                            const fullLog = (logResponse && typeof logResponse === 'object' && logResponse.body !== undefined) 
-                                ? logResponse.body 
-                                : logResponse;
+                            const fullLog = logResponse.body;
 
                             if (fullLog && typeof fullLog === 'string' && fullLog.length > lastLogLength) {
                                 const newContent = fullLog.substring(lastLogLength);
@@ -125,33 +128,37 @@ class K8sProvider extends DeploymentProvider {
                 }
 
                 // 2. Check Job Status AFTER log attempt
-                const jobStatus = await this.batchApi.readNamespacedJobStatus({
+                const jobStatusRes = await this.batchApi.readNamespacedJobStatus({
                     name: jobName,
                     namespace: this.namespace
                 });
 
+                const jobStatus = jobStatusRes.body;
+
                 if (jobStatus.status && jobStatus.status.succeeded > 0) {
                     jobCompleted = true;
+                    if (intervalId) clearInterval(intervalId);
                     handle.emitComplete({ jobId: jobName });
                     setTimeout(() => this.cleanup(jobName), 10000);
                     return;
                 } else if (jobStatus.status && jobStatus.status.failed > 0) {
                     jobCompleted = true;
+                    if (intervalId) clearInterval(intervalId);
                     handle.emitError(new Error("Build job failed in Kubernetes. Check logs for details."));
                     setTimeout(() => this.cleanup(jobName), 10000);
                     return;
                 }
             } catch (err) {
-                console.error("Polling error:", err);
+                console.error("Polling error in K8sProvider:", err);
             }
         };
 
         // Run immediately then start interval
         pollLogic();
-        const pollInterval = setInterval(pollLogic, 3000);
+        intervalId = setInterval(pollLogic, 3000);
 
         handle.onCancel(() => {
-            clearInterval(pollInterval);
+            clearInterval(intervalId);
             jobCompleted = true;
         });
     }
