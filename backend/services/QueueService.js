@@ -64,6 +64,7 @@ class QueueService {
                 }
             });
 
+            deploymentHandle.onComplete(async (data) => {
                 const baseDomain = process.env.DEPLOY_DOMAIN || "api-deploydash.nstsdc.org";
                 project.url = `https://${project.name}.${baseDomain}`;
                 await project.save();
