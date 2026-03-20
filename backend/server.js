@@ -9,13 +9,14 @@ const { authUser } = require("./middlewares/auth.js")
 
 require("dotenv").config();
 
-const port = 7830;
+const port = process.env.PORT || 7830;
 const app = express();
 
 // connect to MongoDB
 const connectDB = async () => {
   try {
-    await mongoose.connect("mongodb://localhost:27017/deployDash");
+    const mongoURI = process.env.MONGODB_URI || "mongodb://localhost:27017/deployDash";
+    await mongoose.connect(mongoURI);
     console.log("MongoDB connected successfully");
   } catch (error) {
     console.error("MongoDB connection error:", error);
