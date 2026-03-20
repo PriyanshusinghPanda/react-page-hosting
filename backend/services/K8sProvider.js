@@ -80,6 +80,20 @@ class K8sProvider extends DeploymentProvider {
                     const pod = items[0];
                     const phase = pod.status && pod.status.phase;
 
+                    // Check for image pull failures — fail fast
+                    const containerStatuses = pod.status && pod.status.containerStatuses;
+                    if (containerStatuses && containerStatuses.length > 0) {
+                        const waiting = containerStatuses[0].state && containerStatuses[0].state.waiting;
+                        if (waiting && (waiting.reason === 'ImagePullBackOff' || waiting.reason === 'ErrImagePull')) {
+                            jobCompleted = true;
+                            clearInterval(intervalId);
+                            handle.emitLog(`❌ Image pull failed: ${waiting.message || waiting.reason}`);
+                            handle.emitError(new Error(`Image pull failed: ${waiting.reason}. Check that the builder image exists and is accessible.`));
+                            setTimeout(() => this._cleanup(jobName), 5000);
+                            return;
+                        }
+                    }
+
                     // Step 2: Fetch logs if pod is active
                     if (phase === 'Running' || phase === 'Succeeded' || phase === 'Failed') {
                         try {
