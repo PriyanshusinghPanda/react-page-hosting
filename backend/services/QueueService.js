@@ -1,26 +1,20 @@
 const Project = require("../models/project");
-const LogService = require("./LogService");
 
 class QueueService {
     constructor() {
         this.queue = [];
         this.activeBuilds = 0;
-        this.maxConcurrentBuilds = 2; // Limit to 2 concurrent builds locally
+        this.maxConcurrentBuilds = 2;
     }
 
-    /**
-     * @param {Object} job - { project, config, provider, handle }
-     */
     enqueue(job) {
         this.queue.push(job);
-        console.log(`Job ${job.project.name} enqueued. Queue length: ${this.queue.length}`);
+        console.log(`[Queue] Job enqueued: ${job.project.name}. Queue size: ${this.queue.length}`);
         this.processNext();
     }
 
     async processNext() {
-        if (this.activeBuilds >= this.maxConcurrentBuilds || this.queue.length === 0) {
-            return;
-        }
+        if (this.activeBuilds >= this.maxConcurrentBuilds || this.queue.length === 0) return;
 
         const job = this.queue.shift();
         this.activeBuilds++;
@@ -28,7 +22,7 @@ class QueueService {
         try {
             await this.executeJob(job);
         } catch (error) {
-            console.error(`Error processing job ${job.project.name}:`, error);
+            console.error(`[Queue] Error processing job ${job.project.name}:`, error);
         } finally {
             this.activeBuilds--;
             this.processNext();
@@ -36,58 +30,64 @@ class QueueService {
     }
 
     async executeJob(job) {
-        const { project, config, provider, handle } = job;
+        const { project, config, provider } = job;
 
         try {
-            // Update status to BUILDING and clear old logs
-            project.status = 'BUILDING';
-            project.logs = ["Starting build process..."];
-            await project.save();
-            
-            LogService.appendLog(project.name, "Starting build process...");
+            // Reset logs and mark as BUILDING
+            await Project.updateOne(
+                { _id: project._id },
+                { status: 'BUILDING', logs: ['Starting build...'] }
+            );
+            console.log(`[Queue] Starting build for ${project.name}`);
 
+            // Run the deployment — K8sProvider returns a handle immediately
             const deploymentHandle = provider.deploy(config);
 
-            // Link the provider's handle to our internal handle
+            // Listen to logs and persist each line to DB
             deploymentHandle.onLog(async (log) => {
-                LogService.appendLog(project.name, log);
-                handle.emitLog(log);
-                
-                // Persist logs to DB
+                console.log(`[LOG:${project.name}] ${log}`);
                 try {
                     await Project.updateOne(
                         { _id: project._id },
                         { $push: { logs: log } }
                     );
                 } catch (e) {
-                    console.error("Failed to persist log line:", e);
+                    console.error('[Queue] Failed to persist log:', e.message);
                 }
             });
 
-            deploymentHandle.onComplete(async (data) => {
-                const baseDomain = process.env.DEPLOY_DOMAIN || "api-deploydash.nstsdc.org";
-                project.url = `https://${project.name}.${baseDomain}`;
-                await project.save();
-                LogService.appendLog(project.name, "Deployment successful!");
-                handle.emitComplete(data);
+            // On success, mark project as DEPLOYED with URL
+            deploymentHandle.onComplete(async () => {
+                const baseDomain = process.env.DEPLOY_DOMAIN || 'api-deploydash.nstsdc.org';
+                await Project.updateOne(
+                    { _id: project._id },
+                    {
+                        status: 'DEPLOYED',
+                        url: `https://${project.name}.${baseDomain}`,
+                        $push: { logs: '✅ Build complete. Site is live!' }
+                    }
+                );
+                console.log(`[Queue] Build SUCCESS for ${project.name}`);
             });
 
+            // On failure, mark project as FAILED
             deploymentHandle.onError(async (err) => {
-                project.status = 'FAILED';
-                await project.save();
-                LogService.appendLog(project.name, `Deployment failed: ${err.message}`);
-                handle.emitError(err);
-            });
-
-            // Handle cancellation if the user aborts
-            handle.onCancel(() => {
-                deploymentHandle.cancel();
+                await Project.updateOne(
+                    { _id: project._id },
+                    {
+                        status: 'FAILED',
+                        $push: { logs: `❌ Build failed: ${err.message}` }
+                    }
+                );
+                console.error(`[Queue] Build FAILED for ${project.name}:`, err.message);
             });
 
         } catch (error) {
-            project.status = 'FAILED';
-            await project.save();
-            handle.emitError(error);
+            await Project.updateOne(
+                { _id: project._id },
+                { status: 'FAILED', $push: { logs: `❌ Error: ${error.message}` } }
+            );
+            console.error(`[Queue] executeJob error for ${project.name}:`, error);
         }
     }
 }
